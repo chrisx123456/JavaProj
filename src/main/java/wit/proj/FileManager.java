@@ -9,7 +9,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class FileManager {
+public class FileManager  {
     static List <Image>  imageList = new ArrayList<Image>();   //Lista klasy Image przechowywująca ścieżki do pliku oraz datę utworzenia
     String sourcePath, destinationPath; //Zmienne String przechowywujące ścieżki do folderu początkowego oraz wynikowego
 
@@ -27,7 +27,7 @@ public class FileManager {
      * @param folder
      * @param imageList
      */
-    public static void getImagePaths(File folder, List <Image> imageList)
+    public static void getImagePaths(File folder, List <Image> imageList) throws Exception
     {
         File[] files = folder.listFiles();
         if(files == null){
@@ -49,14 +49,14 @@ public class FileManager {
                      */
 
                 } catch(IOException e){
-                    e.printStackTrace();
+                    throw new Exception("Failed to add image to the list of images " );
                 }
 
             }
         }
     }
     //Sposób wywołania Save(new File(destinationPath),imageList)
-    public static void Save (File folder, List <Image> imageList){
+    public static void Save (File folder, List <Image> imageList) throws Exception{
         File[] files = folder.listFiles();
         if(imageList == null){
             return;
@@ -73,8 +73,7 @@ public class FileManager {
 
                 if(!subFolder.mkdir()){ //Probuje utworzyć folder. Jeśli nie uda się wyrzuca błąd
 
-                    System.out.println("Failed to create folder " + subFolder.getAbsolutePath());
-                    return;
+                    throw new Exception("Failed to create folder " + subFolder.getAbsolutePath());
                 }
             }
 
@@ -86,7 +85,7 @@ public class FileManager {
                 Files.copy(Image.getSourcePath(),imagePathWithName);
 
             }catch(IOException e){
-                e.printStackTrace();
+                throw new Exception("Failed to Copy file");
 
             }
 
