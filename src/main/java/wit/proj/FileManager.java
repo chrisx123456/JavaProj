@@ -9,7 +9,8 @@ import java.util.List;
 
 public class FileManager  {
      public static List<Image> imageList = new ArrayList<>();   //Lista klasy Image przechowywująca ścieżki do pliku oraz datę utworzenia
-     public String sourcePath, destinationPath; //Zmienne String przechowywujące ścieżki do folderu początkowego oraz wynikowego
+     public static String sourcePath;
+    public String destinationPath; //Zmienne String przechowywujące ścieżki do folderu początkowego oraz wynikowego
 
     //Konstruktor 2 argumentowy przyjmujący ścieżki do folderu początkowego oraz wynikowego
     public  FileManager(String sourcePath, String destinationPath){
@@ -23,9 +24,9 @@ public class FileManager  {
      * Przechodzi ona zdjęcie po zdjęciu i folder po folderze pobierając ściezki znajdujących się tam zdjęć,
      *      po czym dodaje tworzy obiekt klast Image z podaną ścieżką i dodaje go do listy.
      * @param folder
-     * @param imageList
+     * @param
      */
-    public static void getImagePaths(File folder, List <Image> imageList) throws Exception
+    public static void getImagePaths(File folder) throws Exception
     {
 
         File[] files = folder.listFiles();
@@ -35,7 +36,7 @@ public class FileManager  {
         //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         for (File file : files) {
             if(file.isDirectory()){
-                getImagePaths(file, imageList);
+                getImagePaths(file);
             }
             else if(file.isFile() && file.getName().endsWith(".jpg")){
                 try{
@@ -68,7 +69,7 @@ public class FileManager  {
     }
     //Sposób wywołania Save(new File(destinationPath),imageList)
     public static void Save (File folder, List <Image> imageList) throws Exception{
-
+        ChceckIfDirectoryExists();
         if(imageList == null){
             return;
         }
@@ -83,12 +84,10 @@ public class FileManager  {
                 System.out.println(subFolder.getAbsolutePath());
 
                 //subFolder.mkdirs();
-                if (!subFolder.exists() && subFolder.isDirectory()) {  //Jeśli nie istnieje i jest folderem
-                    try{
-                        subFolder.mkdirs();
-                    }
-                    catch(Exception e){throw new Exception("Failed to create folder " + subFolder.getAbsolutePath() +e ) ;}
-
+                if (!subFolder.exists() && !subFolder.isDirectory()) {  //Jeśli folder nie istnieje i nie jest folderem
+                        if(!subFolder.mkdirs()){
+                            throw new Exception("Failed to create folder " + subFolder.getAbsolutePath());
+                        }
                 }
 
                 //Kopiowanie pliku do nowego foldru
@@ -115,6 +114,14 @@ public class FileManager  {
 
         }
 
+    }
+    private static void ChceckIfDirectoryExists()throws Exception{
+        File folder = new File(sourcePath);
+        if (!folder.exists() && !folder.isDirectory()) {  //Jeśli folder nie istnieje i nie jest folderem
+            if(!folder.mkdirs()){
+                throw new Exception("Failed to create folder " + folder.getAbsolutePath());
+            }
+        }
     }
     public static List<Image> getImageList() {
         return imageList;
