@@ -5,13 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileManager  {
-    static List <Image>  imageList = new ArrayList<Image>();   //Lista klasy Image przechowywująca ścieżki do pliku oraz datę utworzenia
-    String sourcePath, destinationPath; //Zmienne String przechowywujące ścieżki do folderu początkowego oraz wynikowego
+     public static List<Image> imageList = new ArrayList<>();   //Lista klasy Image przechowywująca ścieżki do pliku oraz datę utworzenia
+     String sourcePath, destinationPath; //Zmienne String przechowywujące ścieżki do folderu początkowego oraz wynikowego
 
     //Konstruktor 2 argumentowy przyjmujący ścieżki do folderu początkowego oraz wynikowego
     public  FileManager(String sourcePath, String destinationPath){
@@ -63,7 +62,7 @@ public class FileManager  {
         }
 
         for(Image image : imageList){
-            String date = image.getDate();
+            String date = image.getCreationDate();
             if(date == null){
                 return;
             }
@@ -82,7 +81,7 @@ public class FileManager  {
             long numberOfFilesInFolder = subFolder.listFiles().length;
             Path imagePathWithName = Paths.get(subFolder.getAbsolutePath(),Long.toString(numberOfFilesInFolder+1));
             try{
-                Files.copy(Image.getSourcePath(),imagePathWithName);
+                Files.copy(Paths.get(image.getSourcePath()),imagePathWithName);
 
             }catch(IOException e){
                 throw new Exception("Failed to Copy file");

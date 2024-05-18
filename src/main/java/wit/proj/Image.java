@@ -3,6 +3,9 @@ package wit.proj;
 //import java.util.Date;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.common.ImageMetadata;
@@ -32,13 +35,26 @@ public class Image {
         if (metadata instanceof JpegImageMetadata jpegMetadata) {
             final TiffImageMetadata exifMetadata = jpegMetadata.getExif();
             final TiffField field = exifMetadata.findField(TIFF_TAG_DATE_TIME);
-            if(field == null){
-
-            } else{
-                return field.getStringValue();
+            if(field != null){
+                try {
+                    return convertDate(field.getStringValue());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return null;
+    }
+
+    private String convertDate(String exifDateString) throws Exception{
+        SimpleDateFormat exifDateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        SimpleDateFormat desiredDateFormat = new SimpleDateFormat("yyyy/MM/dd");
+        try {
+            Date date = exifDateFormat.parse(exifDateString);
+            return desiredDateFormat.format(date);
+        } catch (Exception e) {
+            throw new Exception("Failed to convert date to new format");
+        }
     }
     //-------------------------\\
     //---------GETTERS---------\\
