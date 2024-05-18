@@ -22,9 +22,9 @@ public class FileManager  {
     /**
      * Metoda przyjmująca folder oraz listę klasy Image.
      * Przechodzi ona zdjęcie po zdjęciu i folder po folderze pobierając ściezki znajdujących się tam zdjęć,
-     *      po czym dodaje tworzy obiekt klast Image z podaną ścieżką i dodaje go do listy.
+     *        po czym dodaje tworzy obiekt klast Image z podaną ścieżką i dodaje go do listy.
      * @param folder
-     * @param
+     * @throws Exception
      */
     public static void getImagePaths(File folder) throws Exception
     {
@@ -33,7 +33,6 @@ public class FileManager  {
         if(files == null){
             return;
         }
-        //SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd");
         for (File file : files) {
             if(file.isDirectory()){
                 getImagePaths(file);
@@ -48,14 +47,6 @@ public class FileManager  {
                     }
                     else{imageList.add(new Image(file.getAbsolutePath()));}
 
-                    //System.out.println("Dodano do listy" + file.getAbsolutePath());
-
-                    /*
-                    Albo w ten sposób odrazu jeśli szympek doda konstruktor z zmienną data odrazu
-                     BasicFileAttributes atributes = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-                     String creationTime = dateFormat.format(new Date(atributes.creationTime().toMillis()));
-                     imageList.add(new Image(file.getAbsolutePath(), creationTime));
-                     */
 
                 } catch(IOException e){
                     throw new Exception("Failed to add image to the list of images " );
@@ -63,9 +54,6 @@ public class FileManager  {
 
             }
         }
-        System.out.println(imageList.size());
-        System.out.println(imageList);
-
     }
     //Sposób wywołania Save(new File(destinationPath),imageList)
     public static void Save (File folder, List <Image> imageList) throws Exception{
@@ -83,7 +71,6 @@ public class FileManager  {
                 File subFolder = new File(folder.getAbsolutePath(), date);
                 System.out.println(subFolder.getAbsolutePath());
 
-                //subFolder.mkdirs();
                 if (!subFolder.exists() && !subFolder.isDirectory()) {  //Jeśli folder nie istnieje i nie jest folderem
                         if(!subFolder.mkdirs()){
                             throw new Exception("Failed to create folder " + subFolder.getAbsolutePath());
@@ -91,7 +78,6 @@ public class FileManager  {
                 }
 
                 //Kopiowanie pliku do nowego foldru
-                // File[] filesInSubFolder = subFolder.listFiles();
                 long numberOfFilesInFolder = 0;
                 if(subFolder.listFiles()!= null){
                     numberOfFilesInFolder = subFolder.listFiles().length;
@@ -100,15 +86,10 @@ public class FileManager  {
 
 
                 Path imagePathWithName = Paths.get(subFolder.getAbsolutePath()).resolve(numberOfFilesInFolder + 1 +".jpg");
-                //Path imagePathWithName = Paths.get("C:\\Users\\alsmo\\Desktop\\obrazy do wklejenia\\zdjęcie.jpg");
                 try {
                     Files.copy(Paths.get(image.getSourcePath()), imagePathWithName);
-                    System.out.println("Plik został skopiowany.");
                 } catch (IOException e) {
-                    // Wyświetlanie dokładnego błędu
-                    System.err.println("Wystąpił błąd podczas kopiowania pliku: " + e.getMessage());
-                    e.printStackTrace();
-                    throw new RuntimeException("Failed to Copy file", e); // rzucanie wyjątku z przyczyną
+                    throw new RuntimeException("Failed to Copy file", e);
                 }
             }
 
