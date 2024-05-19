@@ -46,6 +46,8 @@ public class Image {
 //        }
 //        return null;
 //    }
+
+
 private String exifDate(String sourcePath) throws IOException, ImagingException {
     File file = new File(sourcePath);
     final ImageMetadata metadata = Imaging.getMetadata(file);
