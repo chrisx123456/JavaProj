@@ -2,11 +2,22 @@ package wit.proj;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-
+import java.io.File;
+/**
+ * Klasa odpowiadająca za UI
+ * @author Maciej Lacek, Bartosz Kowalczyk
+ * @since 20.05.2024
+ * @version 1.0
+ */
 public class UI extends JFrame {
+    /**JTextField przechowyjący ścieżkę do foldery ze zdjęciami*/
     final private JTextField sourcePathField;
+    /**JTextField przechowyjący ścieżkę do foldery w którym będzie tworzyć podfoldery i zapisywac zdjęcia*/
     final private JTextField destinationPathField;
 
+    /**
+     * Konstuktor klasy, klasa dziediczy po JFrame więc wszystkie kontrolki są dodawane własnie w konstruktorze.
+     */
     public UI(){
         setLayout(new GridLayout(3, 1));
 
@@ -54,31 +65,53 @@ public class UI extends JFrame {
                 try {
                     Run();
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    DisplayMessage(ex.getMessage(), JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
         startPanel.add(startBtn);
 
-        add(sourcePanel);
-        add(destinationPanel);
-        add(startPanel);
+        this.add(sourcePanel);
+        this.add(destinationPanel);
+        this.add(startPanel);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        pack();
-        setVisible(true);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //Ustawia wysokość/szerokość okna tak aby dostosował się do PrefferedSize kontrolek.
+        this.pack();
+        this.setVisible(true);
     }
+
+    /**
+     * Metoda uruchamiająca działanie programu
+     * @throws Exception Jakikolwiek wyjątek wygenerowany w trakcie działania programu, wyjątek obslużony jest w logice przycisku w konstruktorze
+     */
     private void Run() throws Exception{
         if(sourcePathField.getText().isEmpty()) throw new Exception("Source path is empty");
         if(destinationPathField.getText().isEmpty()) throw new Exception("Destination path is empty");
-        //FileManager.Load?(sourcePathField.getText(), destinationPathField.getText())
+        File src = new File(sourcePathField.getText());
+        File dst = new File(destinationPathField.getText());
+        FileManager.RunMultiThread(src, dst);
     }
 
+    /**
+     * Metoda wyświetlająca popup
+     * @param msg Wiadomośc do wyświetlenia
+     * @param type Typ okienka z wiadomością np Message,Error
+     */
+    public static void DisplayMessage(String msg, int type){
+        JOptionPane.showMessageDialog(null, msg, "", type);
+    }
+
+    /**
+     * main, uruchamia całe UI
+     * @param args args
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 new UI();
             }
+
         });
     }
 }
