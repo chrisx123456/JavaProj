@@ -14,12 +14,12 @@ public class UI extends JFrame {
     final private JTextField sourcePathField;
     /**JTextField przechowyjący ścieżkę do foldery w którym będzie tworzyć podfoldery i zapisywac zdjęcia*/
     final private JTextField destinationPathField;
-
+    final private JComboBox<Integer> processorComboBox;
     /**
      * Konstuktor klasy, klasa dziediczy po JFrame więc wszystkie kontrolki są dodawane własnie w konstruktorze.
      */
     public UI(){
-        setLayout(new GridLayout(3, 1));
+        setLayout(new GridLayout(4, 1));
 
         JPanel sourcePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         sourcePathField = new JTextField(20);
@@ -57,6 +57,18 @@ public class UI extends JFrame {
         destinationPanel.add(destinationPathField);
         destinationPanel.add(destinationBtn);
 
+        JPanel comboBoxPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        int processors = Runtime.getRuntime().availableProcessors();
+        Integer[] processorOptions = new Integer[processors];
+        for (int i = 0; i < processors; i++) {
+            processorOptions[i] = i + 1;
+        }
+        processorComboBox = new JComboBox<>(processorOptions);
+        processorComboBox.setSelectedIndex(processorComboBox.getItemCount()-1);
+        comboBoxPanel.add(new JLabel("Processors:"));
+        comboBoxPanel.add(processorComboBox);
+
+
         JPanel startPanel = new JPanel();
         JButton startBtn = new JButton("Start");
         startBtn.addActionListener(new ActionListener() {
@@ -73,6 +85,7 @@ public class UI extends JFrame {
 
         this.add(sourcePanel);
         this.add(destinationPanel);
+        this.add(comboBoxPanel);
         this.add(startPanel);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //Ustawia wysokość/szerokość okna tak aby dostosował się do PrefferedSize kontrolek.
@@ -90,7 +103,8 @@ public class UI extends JFrame {
         if(destinationPathField.getText().isEmpty()) throw new Exception("Destination path is empty");
         File src = new File(sourcePathField.getText());
         File dst = new File(destinationPathField.getText());
-        FileManager.RunMultiThread(src, dst);
+        int cores = (int)processorComboBox.getSelectedItem(); //Nigdy nie powinno być null.
+        FileManager.RunMultiThread(src, dst, cores);
     }
 
     /**

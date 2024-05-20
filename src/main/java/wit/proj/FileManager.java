@@ -30,7 +30,7 @@ public class FileManager {
      * @param dstFolder Folder docelowy
      * @throws Exception Wyjątek z metod GetImagesPaths/Save/CreateImageList
      */
-    public static void RunMultiThread(File srcFolder, File dstFolder) throws Exception {
+    public static void RunMultiThread(File srcFolder, File dstFolder, int cores) throws Exception {
         pathsList.clear(); //Czyszczenie listy przy każdym naciśnięciu przycisku
         copiedFiles = 0;
         skippedFiles = 0;
@@ -38,7 +38,6 @@ public class FileManager {
         GetImagesPaths(srcFolder);
 
         if(pathsList.isEmpty()) throw new Exception("No images found at all");
-        int cores = Runtime.getRuntime().availableProcessors(); //Pobiera liczbę dostępnych rdzeni procesora
         if(pathsList.size() < cores) cores = pathsList.size(); //Jeśli zdjęć jest mniej niż wątków ustawiamy liczbe wątków na liczbe zdj(1 wątek -> 1 zdj)
 
         int listSize = pathsList.size();
