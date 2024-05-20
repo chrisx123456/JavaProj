@@ -22,6 +22,7 @@ public class FileManager {
 
     public static List<File> pathsList = new ArrayList<>();//Lista przechowywująca ścieżki do pliku
     public static int copiedFiles = 0;//Liczba skopiowanych plików
+    public static int skippedFiles = 0;
 
     /**
      * Metoda odpowiadająca za podzielenie zdjęć na równe przedziały które są następnie przetwarzane wielowątkowo
@@ -32,20 +33,26 @@ public class FileManager {
     public static void RunMultiThread(File srcFolder, File dstFolder) throws Exception {
         pathsList.clear(); //Czyszczenie listy przy każdym naciśnięciu przycisku
         copiedFiles = 0;
+        skippedFiles = 0;
+
         GetImagesPaths(srcFolder);
+
+        if(pathsList.isEmpty()) throw new Exception("No images found at all");
         int cores = Runtime.getRuntime().availableProcessors(); //Pobiera liczbę dostępnych rdzeni procesora
+        if(pathsList.size() < cores) cores = pathsList.size(); //Jeśli zdjęć jest mniej niż wątków ustawiamy liczbe wątków na liczbe zdj(1 wątek -> 1 zdj)
+
         int listSize = pathsList.size();
         int sublistSize = listSize / cores; //Ile obiektów ma być w podlistach dla każdego wątku
         int startIndex = 0;
         List<Callable<Void>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(cores);
+
         for (int i = 0; i < cores; i++) {
             int endIndex = startIndex + sublistSize;
             if (i == cores - 1) {
                 endIndex = listSize;
             }
             List<File> subList = new ArrayList<>(pathsList.subList(startIndex, endIndex)); //Tworzenie podlist dla wątkow
-
             Callable<Void> task = () -> {
                 List<Image> images = CreateImageList(subList); //Wywołanie metody tworzenia listy obiektów klasy image
                 Save(dstFolder, images); //Wywołanie metody kopiowania zdjęć
@@ -61,7 +68,10 @@ public class FileManager {
             future.get();
         }
         executorService.shutdown();
-        UI.DisplayMessage("Copied Files: " + copiedFiles, JOptionPane.INFORMATION_MESSAGE); //Wypiswywanie okienka z liczbą łącznie przekopiowanych zdjęć
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Copied Files: ").append(copiedFiles).append("\n").append("Skipped Files(No exif): ").append(skippedFiles);
+        UI.DisplayMessage(sb.toString(), JOptionPane.INFORMATION_MESSAGE); //Wypiswywanie okienka z liczbą łącznie przekopiowanych zdjęć
     }
 
     /**
@@ -69,11 +79,9 @@ public class FileManager {
      * @param folder Folder źródłowy
      * @throws Exception ?
      */
-    public static void GetImagesPaths(File folder) throws Exception{
+    public static void GetImagesPaths(File folder){
         File[] files = folder.listFiles();
-        //Jeśli folder jest pusty przerywa działanie
-        //To jest źle bo może być pusty folder w sumie
-        if(files == null){
+        if(files == null || files.length == 0){
             UI.DisplayMessage("No files found in dir: " + folder.getAbsolutePath(), JOptionPane.INFORMATION_MESSAGE);
             return;
         }
@@ -93,17 +101,15 @@ public class FileManager {
      * @return List<Image> - lista zdjęć
      * @throws Exception Wyjątek wyrzucany gdy paths jest puste/null
      */
-    public static List<Image> CreateImageList(List<File> paths) throws Exception{
+    public static List<Image> CreateImageList(List<File> paths) throws Exception {
         List<Image> images = new ArrayList<>();
-        if(paths==null || paths.isEmpty()) throw new Exception("No images at given dir");
+        if(paths==null || paths.isEmpty()) throw new NullPointerException("Paths list is null or empty");
         for(File file : paths){
-            if(file.isFile() && (file.getName().endsWith(".JPG") || file.getName().endsWith(".JPEG") ||
-                    file.getName().endsWith(".jpg")|| file.getName().endsWith(".jpeg") )){
-                Image image = new Image(file.getAbsolutePath());
-                String date = image.getCreationDate();
-                if(date != null && !date.isEmpty())
-                    images.add(image);
-            }
+            Image image = new Image(file.getAbsolutePath());
+            String date = image.getCreationDate();
+            if(date != null && !date.isEmpty())
+                images.add(image);
+            else if(date==null) skippedFiles++;
         }
         return images;
     }
@@ -114,11 +120,12 @@ public class FileManager {
      *      miejsa początkowego do docleowego z zmienioną nazwą
      * @param folder Przyjmuje Plik o zadanej ścieżce
      * @param imageList Lista zdjęć do zapisania
-     * @throws Exception Nie udało się utworzyć folderu
+     * @throws NullPointerException Lista ze zdjęciami jest pusta
+     * @throws IOException Problem z tworzeniem folderu/zapisem zdjęcia
      */
-    public static void Save (File folder, List<Image> imageList) throws Exception{
+    public static void Save (File folder, List<Image> imageList) throws NullPointerException, IOException{
         if(imageList == null || imageList.isEmpty()){//Jeśli lista obiektów jest pusta to przerywa działanie
-            throw new Exception("No correct files found to copy");
+            throw new NullPointerException("Image list is null or empty");
         }
         int HowManyHaveBeenCopied = 0;
         synchronized(FileManager.class) {
@@ -130,7 +137,7 @@ public class FileManager {
                 if (!subFolder.exists() || !subFolder.isDirectory()) {//Jeśli folder nie istnieje lub nie jest folderem
                     if (!subFolder.mkdirs()) { //Próbuje utworzyć foldery.Jeśli się nie uda wyrzuca błąd
                         if (!subFolder.exists() || !subFolder.isDirectory()) {//Sprawdza czy inny wątek w międzyczasie nie stowrzył folderu
-                            throw new Exception("Failed to create folder " + subFolder.getAbsolutePath());
+                            throw new IOException("Failed to create folder " + subFolder.getAbsolutePath());
                         }
                     }
                 }
@@ -144,7 +151,7 @@ public class FileManager {
                     Files.copy(Paths.get(image.getSourcePath()), imagePathWithName);//Kopjuje plik
                     HowManyHaveBeenCopied++;
                 } catch (IOException e) {
-                    throw new IOException("Failed to copy file " + e.getMessage());
+                    throw new IOException("Failed to copy file: " + e.getMessage());
                 }
 
             }
