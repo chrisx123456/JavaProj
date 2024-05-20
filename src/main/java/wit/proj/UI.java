@@ -74,10 +74,10 @@ public class UI extends JFrame {
         this.add(sourcePanel);
         this.add(destinationPanel);
         this.add(startPanel);
-
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //Ustawia wysokość/szerokość okna tak aby dostosował się do PrefferedSize kontrolek.
         this.pack();
+        this.setResizable(false);
         this.setVisible(true);
     }
 
