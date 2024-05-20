@@ -104,6 +104,7 @@ public class UI extends JFrame {
         File src = new File(sourcePathField.getText());
         File dst = new File(destinationPathField.getText());
         int cores = (int)processorComboBox.getSelectedItem(); //Nigdy nie powinno być null.
+        System.out.println(cores);
         FileManager.RunMultiThread(src, dst, cores);
     }
 
@@ -113,7 +114,11 @@ public class UI extends JFrame {
      * @param type Typ okienka z wiadomością np Message,Error
      */
     public static void DisplayMessage(String msg, int type){
-        JOptionPane.showMessageDialog(null, msg, "", type);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog(null, msg, "", type);
+            }
+        });
     }
 
     /**

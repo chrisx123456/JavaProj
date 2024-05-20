@@ -30,17 +30,19 @@ public class FileManager {
      * @param dstFolder Folder docelowy
      * @throws Exception Wyjątek z metod GetImagesPaths/Save/CreateImageList
      */
-    public static void RunMultiThread(File srcFolder, File dstFolder, int cores) throws Exception {
+    public static void RunMultiThread(File srcFolder, File dstFolder, int processors) throws Exception {
         pathsList.clear(); //Czyszczenie listy przy każdym naciśnięciu przycisku
         copiedFiles = 0;
         skippedFiles = 0;
+        int cores = processors;
 
         GetImagesPaths(srcFolder);
 
         if(pathsList.isEmpty()) throw new Exception("No images found at all");
-        if(pathsList.size() < cores) cores = pathsList.size(); //Jeśli zdjęć jest mniej niż wątków ustawiamy liczbe wątków na liczbe zdj(1 wątek -> 1 zdj)
+        if(pathsList.size() <= cores) cores = pathsList.size(); //Jeśli zdjęć jest mniej niż wątków ustawiamy liczbe wątków na liczbe zdj(1 wątek -> 1 zdj)
 
         int listSize = pathsList.size();
+
         int sublistSize = listSize / cores; //Ile obiektów ma być w podlistach dla każdego wątku
         int startIndex = 0;
         List<Callable<Void>> tasks = new ArrayList<>();
@@ -52,6 +54,7 @@ public class FileManager {
                 endIndex = listSize;
             }
             List<File> subList = new ArrayList<>(pathsList.subList(startIndex, endIndex)); //Tworzenie podlist dla wątkow
+            System.out.println(i);
             Callable<Void> task = () -> {
                 List<Image> images = CreateImageList(subList); //Wywołanie metody tworzenia listy obiektów klasy image
                 Save(dstFolder, images); //Wywołanie metody kopiowania zdjęć
@@ -69,7 +72,7 @@ public class FileManager {
         executorService.shutdown();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Copied Files: ").append(copiedFiles).append("\n").append("Skipped Files(No exif): ").append(skippedFiles);
+        sb.append("Copied Files: ").append(copiedFiles).append("\n").append("Skipped Files(No exif/No tag): ").append(skippedFiles);
         UI.DisplayMessage(sb.toString(), JOptionPane.INFORMATION_MESSAGE); //Wypiswywanie okienka z liczbą łącznie przekopiowanych zdjęć
     }
 
@@ -123,9 +126,14 @@ public class FileManager {
      * @throws IOException Problem z tworzeniem folderu/zapisem zdjęcia
      */
     public static void Save (File folder, List<Image> imageList) throws NullPointerException, IOException{
-        if(imageList == null || imageList.isEmpty()){//Jeśli lista obiektów jest pusta to przerywa działanie
+        if(imageList == null){//Jeśli lista obiektów jest pusta to przerywa działanie
             throw new NullPointerException("Image list is null or empty");
         }
+        if(imageList.isEmpty()){
+            UI.DisplayMessage("image list in Thread is empty(If there is a lot no-exif/no-tag images this is normal)", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         int HowManyHaveBeenCopied = 0;
         synchronized(FileManager.class) {
             for (Image image : imageList) {//Przechodzi przez każdy obiekt w liście
