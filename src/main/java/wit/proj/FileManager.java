@@ -30,10 +30,11 @@ public class FileManager {
      * @param dstFolder Folder docelowy
      * @throws Exception Wyjątek z metod GetImagesPaths/Save/CreateImageList
      */
-    public static void RunMultiThread(File srcFolder, File dstFolder, int cores) throws Exception {
+    public static void RunMultiThread(File srcFolder, File dstFolder, int processors) throws Exception {
         pathsList.clear(); //Czyszczenie listy przy każdym naciśnięciu przycisku
         copiedFiles = 0;
         skippedFiles = 0;
+        int cores = processors;
 
         GetImagesPaths(srcFolder);
 
