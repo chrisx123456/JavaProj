@@ -14,9 +14,6 @@
             <artifactId>commons-imaging</artifactId>
             <version>1.0.0-alpha5</version>
         </dependency>
--
-        
-
     </dependencies>
 
     <properties>
