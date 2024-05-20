@@ -19,9 +19,10 @@ import java.util.concurrent.Future;
  * @version 1.1
  */
 public class FileManager {
-
-    public static List<File> pathsList = new ArrayList<>();//Lista przechowywująca ścieżki do pliku
-    public static int copiedFiles = 0;//Liczba skopiowanych plików
+    /**Lista obiektów klasy Image przechowywująca ścieżki do pliku oraz datę utworzenia */
+    public static List<File> pathsList = new ArrayList<>();
+    /**Liczba skopiowanych plików*/
+    public static int copiedFiles = 0;
 
     /**
      * Metoda odpowiadająca za podzielenie zdjęć na równe przedziały które są następnie przetwarzane wielowątkowo
@@ -30,12 +31,12 @@ public class FileManager {
      * @throws Exception Wyjątek z metod GetImagesPaths/Save/CreateImageList
      */
     public static void RunMultiThread(File srcFolder, File dstFolder) throws Exception {
-        pathsList.clear(); //Czyszczenie listy przy każdym naciśnięciu przycisku
+        pathsList.clear();
         copiedFiles = 0;
         GetImagesPaths(srcFolder);
-        int cores = Runtime.getRuntime().availableProcessors(); //Pobiera liczbę dostępnych rdzeni procesora
+        int cores = Runtime.getRuntime().availableProcessors();
         int listSize = pathsList.size();
-        int sublistSize = listSize / cores; //Ile obiektów ma być w podlistach dla każdego wątku
+        int sublistSize = listSize / cores;
         int startIndex = 0;
         List<Callable<Void>> tasks = new ArrayList<>();
         ExecutorService executorService = Executors.newFixedThreadPool(cores);
@@ -44,11 +45,11 @@ public class FileManager {
             if (i == cores - 1) {
                 endIndex = listSize;
             }
-            List<File> subList = new ArrayList<>(pathsList.subList(startIndex, endIndex)); //Tworzenie podlist dla wątkow
+            List<File> subList = new ArrayList<>(pathsList.subList(startIndex, endIndex));
 
             Callable<Void> task = () -> {
-                List<Image> images = CreateImageList(subList); //Wywołanie metody tworzenia listy obiektów klasy image
-                Save(dstFolder, images); //Wywołanie metody kopiowania zdjęć
+                List<Image> images = CreateImageList(subList);
+                Save(dstFolder, images);
                 return null;
             };
             tasks.add(task);
@@ -61,25 +62,25 @@ public class FileManager {
             future.get();
         }
         executorService.shutdown();
-        UI.DisplayMessage("Copied Files: " + copiedFiles, JOptionPane.INFORMATION_MESSAGE); //Wypiswywanie okienka z liczbą łącznie przekopiowanych zdjęć
+        UI.DisplayMessage("Copied Files: " + copiedFiles, JOptionPane.INFORMATION_MESSAGE);
     }
 
     /**
-     * Metoda pobierająca ścieżki do plików z podanego folderu i jego podfolderów poczym dodaje je do listy pathsList
+     *
      * @param folder Folder źródłowy
      * @throws Exception ?
      */
     public static void GetImagesPaths(File folder) throws Exception{
         File[] files = folder.listFiles();
-        //Jeśli folder jest pusty przerywa działanie
+        /**Jeśli folder jest pusty przerywa działanie*/
         //To jest źle bo może być pusty folder w sumie
         if(files == null){
             throw new Exception("No dir found");
         }
-        for(File file : files){    //Przechodzi przez wszystkie pliki w folderze
-            if(file.isDirectory()){     //Jeśli aktualny plik jest folderem to wywołuje ponownie tą funkcję z nową ścieżką
+        for(File file : files){
+            if(file.isDirectory()){
                 GetImagesPaths(file);
-            } else if(file.isFile() && (file.getName().endsWith(".JPG") || file.getName().endsWith(".JPEG") ||  //Jeśli plik jest zdjęciem JPG to dodaje do listy
+            } else if(file.isFile() && (file.getName().endsWith(".JPG") || file.getName().endsWith(".JPEG") ||
                     file.getName().endsWith(".jpg")|| file.getName().endsWith(".jpeg"))){
                 pathsList.add(file);
             }
@@ -87,7 +88,7 @@ public class FileManager {
     }
 
     /**
-     * Metoda zwracająca listę obiektów klasy Image
+     *
      * @param paths Ścieżki zdjęć
      * @return List<Image> - lista zdjęć
      * @throws Exception Wyjątek wyrzucany gdy paths jest puste/null
@@ -116,31 +117,40 @@ public class FileManager {
      * @throws Exception Nie udało się utworzyć folderu
      */
     public static void Save (File folder, List<Image> imageList) throws Exception{
-        if(imageList == null || imageList.isEmpty()){//Jeśli lista obiektów jest pusta to przerywa działanie
-            throw new Exception("No correct files found to copy");
+       // ChceckIfDirectoryExists();
+        /**Jeśli lista obiektów jest pusta to przerywa działanie*/
+        if(imageList == null || imageList.isEmpty()){
+            System.out.println("No correct files found to copy ");
+            return;
         }
         int HowManyHaveBeenCopied = 0;
+        /**Przechodzi przez każdy obiekt w liście*/
         synchronized(FileManager.class) {
-            for (Image image : imageList) {//Przechodzi przez każdy obiekt w liście
+            for (Image image : imageList) {
                 String date = image.getCreationDate();
                 File subFolder = new File(folder.getAbsolutePath(), date);
 
-
-                if (!subFolder.exists() || !subFolder.isDirectory()) {//Jeśli folder nie istnieje lub nie jest folderem
-                    if (!subFolder.mkdirs()) { //Próbuje utworzyć foldery.Jeśli się nie uda wyrzuca błąd
-                        if (!subFolder.exists() || !subFolder.isDirectory()) {//Sprawdza czy inny wątek w międzyczasie nie stowrzył folderu
+                /**Jeśli folder nie istnieje i nie jest folderem*/
+                if (!subFolder.exists() || !subFolder.isDirectory()) {
+                    /**Próbuje utworzyć foldery.Jeśli się nie uda wyrzuca błąd*/
+                    if (!subFolder.mkdirs()) {
+                        //Sprawdza czy inny wątek w międzyczasie nie stowrzył folderu
+                        if (!subFolder.exists() || !subFolder.isDirectory()) {
                             throw new Exception("Failed to create folder " + subFolder.getAbsolutePath());
                         }
                     }
                 }
                 //Kopiowanie pliku do nowego foldru
                 long numberOfFilesInFolder = 0;
-                if (subFolder.listFiles() != null) { //Jeśli folder nie jest pusty przypisuje liczbę plików w nim do zmiennej
+                /**Jeśli folder nie jest pusty przypisuje liczbę plików w nim do zmiennej*/
+                if (subFolder.listFiles() != null) {
                     numberOfFilesInFolder = subFolder.listFiles().length;
                 }
-                Path imagePathWithName = Paths.get(subFolder.getAbsolutePath()).resolve(numberOfFilesInFolder + 1 + ".jpg");//Tworzenie nowej ścieżki dla pliku
+                /**Tworzenie nowej ścieżki dla pliku*/
+                Path imagePathWithName = Paths.get(subFolder.getAbsolutePath()).resolve(numberOfFilesInFolder + 1 + ".jpg");
                 try {
-                    Files.copy(Paths.get(image.getSourcePath()), imagePathWithName);//Kopjuje plik
+                    /**Kopjuje plik*/
+                    Files.copy(Paths.get(image.getSourcePath()), imagePathWithName);
                     HowManyHaveBeenCopied++;
                 } catch (IOException e) {
                     throw new IOException("Failed to copy file " + e.getMessage());
