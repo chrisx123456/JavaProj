@@ -75,7 +75,8 @@ public class FileManager {
         /**Jeśli folder jest pusty przerywa działanie*/
         //To jest źle bo może być pusty folder w sumie
         if(files == null){
-            throw new Exception("No dir found");
+            UI.DisplayMessage("No files found in dir: " + folder.getAbsolutePath(), JOptionPane.INFORMATION_MESSAGE);
+            return;
         }
         for(File file : files){
             if(file.isDirectory()){
