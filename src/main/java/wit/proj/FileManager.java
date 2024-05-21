@@ -19,10 +19,13 @@ import java.util.concurrent.Future;
  * @version 1.1
  */
 public class FileManager {
-
-    public static List<File> pathsList = new ArrayList<>();//Lista przechowywująca ścieżki do pliku
-    public static int copiedFiles = 0;//Liczba skopiowanych plików
+    /**Lista przechowywująca ścieżki do pliku*/
+    public static List<File> pathsList = new ArrayList<>();
+    /**Liczba skopiowanych plików*/
+    public static int copiedFiles = 0;
+    /**Liczba nie skopiowanych plików ze względu na EXIF*/
     public static int skippedFiles = 0;
+
 
     /**
      * Metoda odpowiadająca za podzielenie zdjęć na równe przedziały które są następnie przetwarzane wielowątkowo
@@ -79,7 +82,7 @@ public class FileManager {
     /**
      * Metoda pobierająca ścieżki do plików z podanego folderu i jego podfolderów poczym dodaje je do listy pathsList
      * @param folder Folder źródłowy
-     * @throws Exception ?
+     * @throws Exception Powiadomienie o braku plików w folderze źródłowym
      */
     public static void GetImagesPaths(File folder){
         File[] files = folder.listFiles();
