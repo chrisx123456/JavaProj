@@ -26,15 +26,19 @@ public class Image {
     /**Zmienna przechowywująca ścieżkę docelową folderu*/
     private final String creationDate;
 
-    /**Konstruktor 1 argumentowy przypisujący sourcePath i wywołujący metodę exifDate aby przypisać datę do zmiennej Date   */
+    /**
+     * **Konstruktor 1 argumentowy przypisujący sourcePath i wywołujący metodę exifDate aby przypisać datę do zmiennej Date
+     * @param sourcePath Scieżka do pliku
+     * @throws Exception Błąd z metod
+     */
     public Image(String sourcePath) throws Exception {
         this.sourcePath = sourcePath;
         this.creationDate = exifDate(sourcePath);
     }
 
     /**
-     * Metoda pobieracją datę z pliku EXIF po czym przy poprawnym pobraniu wywołuję metodę ConvertDate i zwraca skonwertowaną datę
-     * @param sourcePath Ścieżka do pliku źródłowego
+     * Pobiera datę z pliku EXIF po czym przy poprawnym pobraniu wywołuję metodę ConvertDate i zwraca skonwertowaną datę
+     * @param sourcePath Ścieżka do pliku
      * @return Zwraca datę
      * @throws Exception Wyrzuca błąd jak jest problem z EXIFem
      */
@@ -79,7 +83,7 @@ public class Image {
     }
 
     /**
-     * Metoda konwertująca początkowy format daty na now w stylu rok/miesiąc/dzień
+     * Konwertuje początkowy format daty na now w stylu rok/miesiąc/dzień
      * @param exifDateString Początkowy format daty
      * @return  Zwraca skonwertowaną datę w nowym formacie
      * @throws ParseException Wyrzuca błąd jeśli nie uda się skonwertować

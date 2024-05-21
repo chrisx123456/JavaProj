@@ -28,9 +28,10 @@ public class FileManager {
 
 
     /**
-     * Metoda odpowiadająca za podzielenie zdjęć na równe przedziały które są następnie przetwarzane wielowątkowo
+     * Odpowiadająca za podzielenie zdjęć na równe przedziały które są następnie przetwarzane wielowątkowo
      * @param srcFolder Folder źródłowy
      * @param dstFolder Folder docelowy
+     * @param processors Liczba wątków którą wybraliśmy
      * @throws Exception Wyjątek z metod GetImagesPaths/Save/CreateImageList
      */
     public static void RunMultiThread(File srcFolder, File dstFolder, int processors) throws Exception {
@@ -80,7 +81,7 @@ public class FileManager {
     }
 
     /**
-     * Metoda pobierająca ścieżki do plików z podanego folderu i jego podfolderów poczym dodaje je do listy pathsList
+     * Pobiera ścieżki do plików z podanego folderu i jego podfolderów poczym dodaje je do listy pathsList
      * @param folder Folder źródłowy
      * @throws Exception Powiadomienie o braku plików w folderze źródłowym
      */
@@ -101,9 +102,9 @@ public class FileManager {
     }
 
     /**
-     * Metoda zwracająca listę obiektów klasy Image
+     * Zwraca listę obiektów klasy Image
      * @param paths Ścieżki zdjęć
-     * @return List<Image> - lista zdjęć
+     * @return lista klasy Image zdjęć
      * @throws Exception Wyjątek wyrzucany gdy paths jest puste/null
      */
     public static List<Image> CreateImageList(List<File> paths) throws Exception {
@@ -118,7 +119,7 @@ public class FileManager {
         }
         return images;
     }
-    //Sposób wywołania Save(new File(destinationPath),imageList)
+
     /**
      * Pobiera obiekt klasy image z listy i przechodzi po każdym pokoleji. Pobiera datę utworzenia tego pliku i
      *      sprawdza czy istnieje folder o takiej dacie jeśli nie to go tworzy.Następnie przekopjowywuje pliki z

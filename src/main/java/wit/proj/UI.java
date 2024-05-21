@@ -14,6 +14,7 @@ public class UI extends JFrame {
     final private JTextField sourcePathField;
     /**JTextField przechowyjący ścieżkę do foldery w którym będzie tworzyć podfoldery i zapisywac zdjęcia*/
     final private JTextField destinationPathField;
+    /**JComboBox wyświetlający do wyboru liczbę wonktów do wykorzystania*/
     final private JComboBox<Integer> processorComboBox;
     /**
      * Konstuktor klasy, klasa dziediczy po JFrame więc wszystkie kontrolki są dodawane własnie w konstruktorze.
@@ -95,7 +96,7 @@ public class UI extends JFrame {
     }
 
     /**
-     * Metoda uruchamiająca działanie programu
+     * Uruchamia działanie programu
      * @throws Exception Jakikolwiek wyjątek wygenerowany w trakcie działania programu, wyjątek obslużony jest w logice przycisku w konstruktorze
      */
     private void Run() throws Exception{
@@ -109,7 +110,7 @@ public class UI extends JFrame {
     }
 
     /**
-     * Metoda wyświetlająca popup
+     * Wyświetla popup
      * @param msg Wiadomośc do wyświetlenia
      * @param type Typ okienka z wiadomością np Message,Error
      */
