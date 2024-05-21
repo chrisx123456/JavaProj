@@ -13,6 +13,8 @@ import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
+import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
+
 import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_DATE_TIME;
 
 public class Image {
@@ -36,7 +38,16 @@ public class Image {
                 System.out.println("Brak metadanych EXIF dla pliku: " + sourcePath);
                 return null;
             }
-            final TiffField field = exifMetadata.findField(TIFF_TAG_DATE_TIME);
+
+            TiffField field = null;
+            TiffField field1 = exifMetadata.findField(TIFF_TAG_DATE_TIME);
+            TiffField field2 = jpegMetadata.findExifValueWithExactMatch(ExifTagConstants.EXIF_TAG_DATE_TIME_ORIGINAL);
+            if (field1 != null) {
+                field = field1;
+            } else if (field2 != null) {
+                field = field2;
+            }
+
             if (field != null) {
                 String exifDateString = field.getStringValue();
                 System.out.println("Data EXIF dla pliku " + sourcePath + ": " + exifDateString);
