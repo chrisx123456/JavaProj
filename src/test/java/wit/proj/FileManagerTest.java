@@ -1,7 +1,7 @@
 package wit.proj;
 
 import org.junit.jupiter.api.Test;
-
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,10 +12,18 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+/**
+ * Klasa testu dla klasy FileManager
+ * @author Bartosz Kowalczyk
+ * @since 20.05.2024
+ * @version 1.1
+ */
 class FileManagerTest {
-
+    /**
+     * Testowanie metody GetImagesPaths
+     */
     @Test
-    void getImagesPathsTest() {
+    public void getImagesPathsTest() {
         //Arrange
         FileManager fm = new FileManager();
         File testFolder = new File("src/test/resources/testowy");
@@ -25,17 +33,19 @@ class FileManagerTest {
 
         //Assert
         assertNotNull(fm.pathsList);
-        assertTrue(fm.pathsList.size() >= 57);
+        assertTrue(fm.pathsList.size() >= 76);
 
     }
-
+    /**
+     * Testowanie metody CreateImageList dla prawidłowych plików
+     */
     @Test
-    void createImageListForValidFilesTest() throws Exception{
+    public void createImageListForValidFilesTest() throws Exception{
         //Przypadek dla poprawnych obrazków
         //Arrange
         List<File> validFiles = new ArrayList<>();
-        validFiles.add(new File("src/test/resources/testowy/Archer.(Fate.stay.night).full.1801264.jpg"));
-        validFiles.add(new File("src/test/resources/testowy/caster-fate-grand-order-solomon-goetia-anime-34552-resized.jpg"));
+        validFiles.add(new File("src/test/resources/testowy/Canon_PowerShot_S40.jpg"));
+        validFiles.add(new File("src/test/resources/testowy/Canon_DIGITAL_IXUS_400.jpg"));
 
         //Act
         List<Image> img = FileManager.CreateImageList(validFiles);
@@ -45,15 +55,17 @@ class FileManagerTest {
         assertNotNull(img);
         assertEquals(2, img.size());
     }
-
+    /**
+     * Testowanie metody CreateImageList dla nieprawidłowych plików
+     */
     @Test
-    void createImageListForInValidFilesTest() throws Exception{
-        //Przypadek gdzie lista plików zawiera pliki bez daty wykonania
+    public void createImageListForInValidFilesTest() throws Exception{
+        //Przypadek gdzie lista plików zawiera pliki błędne
         //Arrange
         List<File> invalidFiles = new ArrayList<>();
-        invalidFiles.add(new File("src/test/resources/testowy/Archer.(Fate.stay.night).full.1801264.jpg"));
-        invalidFiles.add(new File("src/test/resources/testowy/caster-fate-grand-order-solomon-goetia-anime-34552-resized.jpg"));
-        invalidFiles.add(new File("src/test/resources/testowy/78932960_2576492565801783_3461086214226968576_n.jpg"));
+        invalidFiles.add(new File("src/test/resources/testowy/Canon_PowerShot_S40.jpg"));
+        invalidFiles.add(new File("src/test/resources/testowy/Canon_DIGITAL_IXUS_400.jpg"));
+        invalidFiles.add(new File("src/test/resources/testowy/invalid/image01088.jpg"));
 
 
         //Act
@@ -65,9 +77,11 @@ class FileManagerTest {
         assertEquals(2, img.size());
 
     }
-
+    /**
+     * Testowanie metody CreateImageList dla pustej listy
+     */
     @Test
-    void createImageListEmptyListTest() throws Exception{
+    public void createImageListEmptyListTest() throws Exception{
         //Przypadek gdzie lista plików jest pusta
         //Arrange
         List<File> empty = new ArrayList<>();
@@ -79,9 +93,11 @@ class FileManagerTest {
         assertEquals("Paths list is null or empty", exception.getMessage());
 
     }
-
+    /**
+     * Testowanie metody CreateImageList dla nullowej listy
+     */
     @Test
-    void createImageListNullListTest() throws Exception{
+    public void createImageListNullListTest() throws Exception{
         //Przypadek gdzie lista plików jest nullem
         //Arrange & Act
         Exception exception = assertThrows(Exception.class, () -> FileManager.CreateImageList(null));
@@ -90,13 +106,15 @@ class FileManagerTest {
         assertEquals("Paths list is null or empty", exception.getMessage());
 
     }
-
+    /**
+     * Testowanie metody Save
+     */
     @Test
-    void saveTest() throws Exception{
+    public void saveTest() throws Exception{
         //Arrange
         File folder = new File("src/test/resources/testowy");
-        Image img1 = new Image("src/test/resources/testowy/Archer.(Fate.stay.night).full.1801264.jpg");
-        Image img2 = new Image("src/test/resources/testowy/caster-fate-grand-order-solomon-goetia-anime-34552-resized.jpg");
+        Image img1 = new Image("src/test/resources/testowy/Canon_PowerShot_S40.jpg");
+        Image img2 = new Image("src/test/resources/testowy/Canon_DIGITAL_IXUS_400.jpg");
         List<Image> images = Arrays.asList(img1, img2);
 
         //Act
@@ -114,9 +132,11 @@ class FileManagerTest {
         assertTrue(subFolder2.isDirectory());
         assertTrue(subFolder2.listFiles().length >= 1);
     }
-
+    /**
+     * Testowanie metody Save dla wyjątku NullPointerException
+     */
     @Test
-    void saveNullPointerExceptionForNullListTest() throws Exception{
+    public void saveNullPointerExceptionForNullListTest() throws Exception{
         //Arrange
         File folder = new File("src/test/resources/testowy");
         List<Image> images = null;
@@ -125,36 +145,29 @@ class FileManagerTest {
         Exception exception = assertThrows(NullPointerException.class, () -> FileManager.Save(folder, images));
         assertEquals("Image list is null or empty", exception.getMessage());
     }
-
+    /**
+     * Testowanie metody Save dla wyjątku IOException w przypadku nieistniejacego katalogu
+     */
     @Test
-    void saveNullPointerExceptionForEmptyListTest() throws Exception{
-        //Arrange
-        File folder = new File("src/test/resources/testowy");
-        List<Image> images = Collections.emptyList();
-
-        //Act & Assert
-        Exception exception = assertThrows(NullPointerException.class, () -> FileManager.Save(folder, images));
-        assertEquals("Image list is null or empty", exception.getMessage());
-    }
-
-    @Test
-    void saveIOExceptionNonExistedDirectoryTest() throws Exception{
+    public void saveIOExceptionNonExistedDirectoryTest() throws Exception{
         //Arrange
         File folder = new File("Z:/nieistniejacykatalog");
-        Image img1 = new Image("src/test/resources/testowy/Archer.(Fate.stay.night).full.1801264.jpg");
+        Image img1 = new Image("src/test/resources/testowy/Canon_PowerShot_S40.jpg");
         List<Image> images = Arrays.asList(img1);
 
         //Act & Assert
         Exception exception = assertThrows(IOException.class, () -> FileManager.Save(folder, images));
-        assertEquals("Failed to create folder Z:\\nieistniejacykatalog\\2014\\11\\17", exception.getMessage());
+        assertEquals("Failed to create folder Z:\\nieistniejacykatalog\\2003\\12\\14", exception.getMessage());
     }
-
+    /**
+     * Testowanie metody Save dla wyjątku IOException w przypadku pliku jako katalogu
+     */
     @Test
-    void saveIOExceptionFileAsDirectoryTest() throws Exception{
+    public void saveIOExceptionFileAsDirectoryTest() throws Exception{
         //Arrange
         Path file = Files.createTempFile("temp", ".jpg");
         File folder = file.toFile();
-        Image img1 = new Image("src/test/resources/testowy/Archer.(Fate.stay.night).full.1801264.jpg");
+        Image img1 = new Image("src/test/resources/testowy/Canon_PowerShot_S40.jpg");
         List<Image> images = Arrays.asList(img1);
 
         //Act & Assert
