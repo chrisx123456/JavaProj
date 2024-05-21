@@ -1,14 +1,11 @@
 package wit.proj;
 
-//import java.util.Date;
 import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.apache.commons.imaging.Imaging;
-import org.apache.commons.imaging.ImagingException;
 import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffField;
@@ -17,14 +14,34 @@ import org.apache.commons.imaging.formats.tiff.constants.ExifTagConstants;
 
 import static org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants.TIFF_TAG_DATE_TIME;
 
+/**
+ * Klasa obiektów Image przechowywująca ścieżkę do pliku oraz datę jego wykonania z pliku EXIF
+ * @author  Szymon Krukowski, Aleksander Traczyk
+ * @since 14.05.2024
+ * @version 1.1
+ */
 public class Image {
+    /**Zmienna przechowywująca ścieżkę źródłową folderu*/
+    private final String sourcePath;
+    /**Zmienna przechowywująca ścieżkę docelową folderu*/
+    private final String creationDate;
+
+    /**
+     * **Konstruktor 1 argumentowy przypisujący sourcePath i wywołujący metodę exifDate aby przypisać datę do zmiennej Date
+     * @param sourcePath Scieżka do pliku
+     * @throws Exception Błąd z metod
+     */
     public Image(String sourcePath) throws Exception {
         this.sourcePath = sourcePath;
         this.creationDate = exifDate(sourcePath);
     }
-    private final String sourcePath;
-    private final String creationDate;
 
+    /**
+     * Pobiera datę z pliku EXIF po czym przy poprawnym pobraniu wywołuję metodę ConvertDate i zwraca skonwertowaną datę
+     * @param sourcePath Ścieżka do pliku
+     * @return Zwraca datę
+     * @throws Exception Wyrzuca błąd jak jest problem z EXIFem
+     */
     private String exifDate(String sourcePath) throws Exception {
         File file = new File(sourcePath);
         final ImageMetadata metadata = Imaging.getMetadata(file);
@@ -65,6 +82,12 @@ public class Image {
         return null;
     }
 
+    /**
+     * Konwertuje początkowy format daty na now w stylu rok/miesiąc/dzień
+     * @param exifDateString Początkowy format daty
+     * @return  Zwraca skonwertowaną datę w nowym formacie
+     * @throws ParseException Wyrzuca błąd jeśli nie uda się skonwertować
+     */
     private String convertDate(String exifDateString) throws ParseException {
         SimpleDateFormat exifDateFormat = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         SimpleDateFormat desiredDateFormat = new SimpleDateFormat("yyyy/MM/dd");
@@ -75,12 +98,18 @@ public class Image {
             throw new ParseException(e.getMessage(), e.getErrorOffset());
         }
     }
-    //-------------------------\\
-    //---------GETTERS---------\\
-    //-------------------------\\
+
+    /**
+     * Getter ścieżki źródłowej
+     * @return Zwraca ścieżkę źródłową
+     */
     public String getSourcePath() {
         return sourcePath;
     }
+    /**
+     * Getter daty
+     * @return Zwraca datę utworzenia
+     */
     public String getCreationDate() {
         return creationDate;
     }
