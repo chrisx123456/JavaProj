@@ -64,6 +64,7 @@ public class FileManager {
 
             startIndex = endIndex;
         }
+
         List<Future<Void>> futures = executorService.invokeAll(tasks);
         //Czekanie na zakończenie wszystkich zadań
         for (Future<Void> future : futures) {
